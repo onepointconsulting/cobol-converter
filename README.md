@@ -14,13 +14,6 @@ poetry install
 This creates a specific environment with all the libraries in need!
 
 
-
-## to start the chatbot
-``````
-
-
-
-
 ## Configuration
 configure the .env file might like this:
 To specify configurations use .env file
