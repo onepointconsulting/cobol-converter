@@ -9,6 +9,7 @@ readme = "README.md"
 python = ">=3.11,<3.12"
 pyautogen = {git = "https://github.com/microsoft/autogen"}
 langchain = "^0.0.335"
+pylint = "^3.0.2"
 
 
 [tool.poetry.group.dev.dependencies]

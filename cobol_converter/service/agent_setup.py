@@ -18,7 +18,7 @@ def cobol_convert_agent_factory() -> AssistantAgent:
     assistant = AssistantAgent(
         name="Python_Coder",
         system_message="""You are a helpful AI assistant.
-You convert Cobol code int Python code""",
+You convert Cobol code into Python code""",
         llm_config=llm_config,
     )
     return assistant
