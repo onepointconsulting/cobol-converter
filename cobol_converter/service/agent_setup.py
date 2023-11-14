@@ -1,5 +1,3 @@
-
-
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
 
 from cobol_converter.autogen_config import llm_config
@@ -67,34 +65,10 @@ def create_group_chat_manager(
 user_proxy = user_proxy_factory()
 cobol_convert_agent = cobol_convert_agent_factory()
 python_test_agent = python_test_agent_factory()
-manager = create_group_chat_manager(user_proxy, cobol_convert_agent, python_test_agent)
+conversion_manager = create_group_chat_manager(
+    user_proxy, cobol_convert_agent, python_test_agent
+)
 
 
 if __name__ == "__main__":
-    
-    from pathlib import Path
-    
-    assert manager is not None
-
-    for cobol_file in list_cobol_files():
-        assert cobol_file is not None
-        user_proxy.initiate_chat(
-            manager,
-            message=f"""Please convert the following code to Python and write unit tests for it: \n\n{cobol_file.read_text()}""",
-        )
-        python_test_message = python_test_agent.last_message()
-        if "content" in python_test_message:
-            content = python_test_message["content"]
-            file_name = cobol_file.name
-            conversion_python_dir = cfg.conversion_python_dir
-            new_file = conversion_python_dir / cobol_file
-            code_blocks = extract_code(content)
-            code_blocks_len = len(code_blocks)
-            if code_blocks_len > 0:
-                # Assume main code
-                python_file: Path = (conversion_python_dir / f"{cobol_file.stem}.py")
-                python_file.write_text(code_blocks[0])
-            if code_blocks_len > 1:
-                # Assume tests
-                python_file: Path = (conversion_python_dir / f"test_{cobol_file.stem}.py")
-                python_file.write_text(code_blocks[1])
+    assert conversion_manager is not None
