@@ -1,10 +1,12 @@
+
+
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
 
 from cobol_converter.autogen_config import llm_config
 from cobol_converter.service.cobol_retriever_function import list_cobol_files
 from cobol_converter.autogen_config import config_list
 from cobol_converter.config import cfg
-from cobol_converter.log_factory import logger
+from cobol_converter.service.code_extractor import extract_code
 
 
 llm_config = {
@@ -30,10 +32,9 @@ def python_test_agent_factory() -> AssistantAgent:
         system_message="""You are a helpful AI assistant.
 You create unit tests based on nthe unittest library for Python code in the conversation.""",
         llm_config=llm_config,
-        is_termination_msg=lambda x: True
+        is_termination_msg=lambda x: True,
     )
     return assistant
-
 
 
 def user_proxy_factory() -> UserProxyAgent:
@@ -64,20 +65,36 @@ def create_group_chat_manager(
 
 
 user_proxy = user_proxy_factory()
-manager = create_group_chat_manager(
-    user_proxy, cobol_convert_agent_factory(), python_test_agent_factory()
-)
+cobol_convert_agent = cobol_convert_agent_factory()
+python_test_agent = python_test_agent_factory()
+manager = create_group_chat_manager(user_proxy, cobol_convert_agent, python_test_agent)
 
 
 if __name__ == "__main__":
+    
+    from pathlib import Path
+    
     assert manager is not None
+
     for cobol_file in list_cobol_files():
         assert cobol_file is not None
         user_proxy.initiate_chat(
             manager,
             message=f"""Please convert the following code to Python and write unit tests for it: \n\n{cobol_file.read_text()}""",
         )
-        for i, (key, value) in enumerate(user_proxy.chat_messages.items()):
-            output_file = cfg.conversion_python_dir/f"{cobol_file.name}_message_{i}.txt"
-            logger.info(output_file)
-            output_file.write_text(value[1]['content'])
+        python_test_message = python_test_agent.last_message()
+        if "content" in python_test_message:
+            content = python_test_message["content"]
+            file_name = cobol_file.name
+            conversion_python_dir = cfg.conversion_python_dir
+            new_file = conversion_python_dir / cobol_file
+            code_blocks = extract_code(content)
+            code_blocks_len = len(code_blocks)
+            if code_blocks_len > 0:
+                # Assume main code
+                python_file: Path = (conversion_python_dir / f"{cobol_file.stem}.py")
+                python_file.write_text(code_blocks[0])
+            if code_blocks_len > 1:
+                # Assume tests
+                python_file: Path = (conversion_python_dir / f"test_{cobol_file.stem}.py")
+                python_file.write_text(code_blocks[1])
