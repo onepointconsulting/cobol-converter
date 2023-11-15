@@ -25,9 +25,11 @@ class Config:
     create_if_not_exists(source_code_dir)
     conversion_python_dir = Path(os.getenv("CONVERSION_PYTHON_DIR"))
     create_if_not_exists(conversion_python_dir)
+    code_execution_dir = Path(os.getenv("CODE_EXECUTION_DIR"))
     assistent_id = os.getenv("ASSISTENT_ID")
     temperature = int(os.getenv("TEMPERATURE"))
     seed = int(os.getenv("SEED"))
+    max_tries = int(os.getenv("MAX_TRIES"))
 
 
 cfg = Config()

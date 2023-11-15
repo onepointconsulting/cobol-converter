@@ -10,10 +10,12 @@ python = ">=3.11,<3.12"
 pyautogen = {git = "https://github.com/microsoft/autogen"}
 langchain = "^0.0.335"
 pylint = "^3.0.2"
+tomli = "^2.0.1"
+black = "^23.11.0"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.11.0"
+
 
 [build-system]
 requires = ["poetry-core"]

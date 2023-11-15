@@ -1,83 +1,89 @@
-The COBOL code provided is a simple implementation of a perceptron, a type of artificial neuron used in machine learning for binary classification tasks. The code initializes weights and bias to random values, then iteratively updates them based on the error between the predicted and actual outputs.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PERCEPTRON.
+       AUTHOR. Victor Ribeiro.
+       DATE-WRITTEN. May 30th 2020.
+       
+       ENVIRONMENT DIVISION.
+            INPUT-OUTPUT SECTION.
+                FILE-CONTROL.
+                    SELECT TRAINING ASSIGN TO "DATA.DAT"
+                       ORGANIZATION IS LINE SEQUENTIAL.
 
-Below is the equivalent Python code for the given COBOL program, along with unit tests using the `unittest` framework:
-
-```python
-# Author: Victor Ribeiro
-# Date-Written: May 30th 2020
-
-import random
-
-class Perceptron:
-    def __init__(self, learning_rate=0.001, iterations=10):
-        self.lr = learning_rate
-        self.it = iterations
-        self.b = random.random()
-        self.w1 = random.random()
-        self.w2 = random.random()
-        self.w3 = random.random()
-        self.w4 = random.random()
-
-    def predict(self, features):
-        prediction = self.b
-        prediction += self.w1 * features[0]
-        prediction += self.w2 * features[1]
-        prediction += self.w3 * features[2]
-        prediction += self.w4 * features[3]
-        return prediction
-
-    def train(self, training_data):
-        for _ in range(self.it):
-            for data in training_data:
-                features = data[:-1]
-                y = data[-1]
-                prediction = self.predict(features)
-                err = y - prediction
-                self.b += err * self.lr
-                self.w1 += features[0] * err * self.lr
-                self.w2 += features[1] * err * self.lr
-                self.w3 += features[2] * err * self.lr
-                self.w4 += features[3] * err * self.lr
-
-    def classify(self, features):
-        prediction = self.predict(features)
-        return 1 if prediction > 0.5 else 0
-
-# Example usage:
-# perceptron = Perceptron()
-# training_data = [
-#     [0.1, 0.2, 0.3, 0.4, 0],
-#     [0.5, 0.6, 0.7, 0.8, 1],
-#     # ... more data ...
-# ]
-# perceptron.train(training_data)
-# print(perceptron.classify([0.1, 0.2, 0.3, 0.4]))
-
-# Unit tests
-import unittest
-
-class TestPerceptron(unittest.TestCase):
-    def test_predict(self):
-        p = Perceptron()
-        p.b = 0
-        p.w1 = 1
-        p.w2 = 1
-        p.w3 = 1
-        p.w4 = 1
-        self.assertEqual(p.predict([1, 1, 1, 1]), 4)
-
-    def test_classify(self):
-        p = Perceptron()
-        p.b = -0.5
-        p.w1 = 1
-        p.w2 = 1
-        p.w3 = 1
-        p.w4 = 1
-        self.assertEqual(p.classify([1, 1, 1, 1]), 1)
-        self.assertEqual(p.classify([0, 0, 0, 0]), 0)
-
-if __name__ == '__main__':
-    unittest.main()
-```
-
-To run the unit tests, save the Python code and the unit tests in a file (e.g., `perceptron.py`) and then execute the file using the Python interpreter. The `unittest` framework will automatically run the test methods `test_predict` and `test_classify` and check if the predictions and classifications are as expected.
+       DATA DIVISION.
+            FILE SECTION.
+                FD TRAINING.
+                    01 X.
+                        02 FEATURE1 PIC X(4).
+                        02 FEATURE2 PIC X(4).
+                        02 FEATURE3 PIC X(4).
+                        02 FEATURE4 PIC X(4).
+                        02 Y PIC 9.
+      
+            WORKING-STORAGE SECTION.
+                01 LR PIC S99V9999 VALUE 00.0010.
+                01 ERR PIC S99V9999.
+                01 B PIC S99V9999.
+                01 W1 PIC S99V9999.
+                01 W2 PIC S99V9999.
+                01 W3 PIC S99V9999.
+                01 W4 PIC S99V9999.
+                01 IT PIC 99 VALUE 10.
+                01 PREDICTION PIC S99V9999.
+                01 FEAT1 PIC 9V9.
+                01 FEAT2 PIC 9V9.
+                01 FEAT3 PIC 9V9.
+                01 FEAT4 PIC 9V9.
+                01 TMP PIC S99V9999.
+                01 F1 PIC S99V99.
+                01 F2 PIC S99V99.
+                01 F3 PIC S99V99.
+                01 F4 PIC S99V99.
+                
+            
+       PROCEDURE DIVISION.
+           COMPUTE B = FUNCTION RANDOM
+           COMPUTE W1 = FUNCTION RANDOM
+           COMPUTE W2 = FUNCTION RANDOM
+           COMPUTE W3 = FUNCTION RANDOM
+           COMPUTE W4 = FUNCTION RANDOM
+           PERFORM IT TIMES
+              OPEN INPUT TRAINING
+              PERFORM 100 TIMES
+                 READ TRAINING INTO X
+                     MOVE FEATURE1 TO FEAT1
+                     MOVE FEATURE2 TO FEAT2
+                     MOVE FEATURE3 TO FEAT3
+                     MOVE FEATURE4 TO FEAT4
+                     COMPUTE PREDICTION = B
+                     COMPUTE PREDICTION = PREDICTION + W1 * FEAT1
+                     COMPUTE PREDICTION = PREDICTION + W2 * FEAT2
+                     COMPUTE PREDICTION = PREDICTION + W3 * FEAT3
+                     COMPUTE PREDICTION = PREDICTION + W4 * FEAT4
+                     COMPUTE ERR = Y - PREDICTION
+                     COMPUTE B = B + ERR * LR
+                     COMPUTE TMP = W1 * FEAT1 * ERR * LR
+                     COMPUTE W1 = W1 + TMP
+                     COMPUTE TMP = W2 * FEAT2 * ERR * LR
+                     COMPUTE W2 = W2 + TMP
+                     COMPUTE TMP = W3 * FEAT3 * ERR * LR
+                     COMPUTE W3 = W3 + TMP
+                     COMPUTE TMP = W4 * FEAT4 * ERR * LR
+                     COMPUTE W4 = W4 + TMP
+             END-PERFORM
+             CLOSE TRAINING
+           END-PERFORM
+           DISPLAY "ENTER 4 VALUES"
+           ACCEPT F1
+           ACCEPT F2
+           ACCEPT F3
+           ACCEPT F4
+           COMPUTE PREDICTION = B + W1 * F1
+           COMPUTE PREDICTION = PREDICTION + W2 * F2
+           COMPUTE PREDICTION = PREDICTION + W3 * F3
+           COMPUTE PREDICTION = PREDICTION + W4 * F4
+           IF PREDICTION > 0.5
+               DISPLAY "1"
+           ELSE
+               DISPLAY "0"
+           END-IF
+           STOP RUN.                                                    

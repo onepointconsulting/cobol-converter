@@ -1,34 +1,22 @@
-Here is the equivalent Python code for the given COBOL program:
-
-```python
-# Author: Gil Fernandes
-# Date:  2023-11-13
-# Purpose: See if Cobol works
-
-def main():
-    print("Hello world, I love you!")
-    print("This is my first cobol programme")
-
-if __name__ == "__main__":
-    main()
-```
-
-Now, let's write some unit tests for this Python code. We'll use the `unittest` framework which is included in the Python standard library.
-
-```python
-import unittest
-from io import StringIO
-from unittest.mock import patch
-
-class TestHelloWorld(unittest.TestCase):
-    def test_output(self):
-        expected_output = "Hello world, I love you!\nThis is my first cobol programme\n"
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            main()
-            self.assertEqual(fake_out.getvalue(), expected_output)
-
-if __name__ == '__main__':
-    unittest.main()
-```
-
-To run the unit tests, you would save the Python code and the unit tests in a file (e.g., `hello_world.py`) and then execute the file using the Python interpreter. The `unittest` framework will automatically run the test method `test_output` and check if the output from the `main` function matches the expected output.
+      ******************************************************************
+      * Author: Gil Fernandes
+      * Date:  2023-11-13
+      * Purpose: See if Cobol works
+      * Tectonics: cobc
+      ******************************************************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. HELLO.
+       DATA DIVISION.
+       FILE SECTION.
+       WORKING-STORAGE SECTION.
+           01 MY_INPUT PIC X(255) VALUE 'HI '.
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+            DISPLAY "Hello world, I love you!"
+            DISPLAY "This is my first cobol programme"
+            DISPLAY "Cobol is really cool"
+            DISPLAY "Now say something ..."
+            ACCEPT MY_INPUT
+            DISPLAY "You have said: " MY_INPUT
+            STOP RUN.
+       END PROGRAM HELLO.
