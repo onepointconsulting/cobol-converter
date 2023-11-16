@@ -39,3 +39,9 @@ LANGCHAIN_DEBUG = True
 # Project related
 PROJECT_ROOT = <the root of your project / property_finder>
 ```
+
+## Running unit tests
+
+```
+python -m unittest
+```

@@ -1,13 +1,8 @@
 from pathlib import Path
 
-from typing import List
+from typing import List, Optional
 
-from cobol_converter.service.agent_setup import (
-    user_proxy,
-    conversion_manager,
-    AGENT_PYTHON_CODER,
-    AGENT_UNIT_TESTER,
-)
+from cobol_converter.service.agent_setup import user_proxy, conversion_manager
 
 from cobol_converter.service.code_extractor import extract_code
 from cobol_converter.service.lint_service import lint_code
@@ -15,6 +10,7 @@ from cobol_converter.service.format_service import format_file
 from cobol_converter.toml_support import prompts
 from cobol_converter.config import cfg
 from cobol_converter.log_factory import logger
+from cobol_converter.service.python_test_runner import run_subprocess
 
 
 def cobol_conversion(cobol_files: List[Path]):
@@ -43,20 +39,20 @@ def convert_single_file(cobol_file: Path):
         message=user_proxy_message,
     )
 
-    def process_message(message: dict, prefix: str, suffix: str = "py"):
+    def process_message(message: dict, prefix: str, suffix: str = "py") -> Optional[Path]:
         if "content" in message:
             content = message["content"]
             conversion_python_dir = cfg.conversion_python_dir
             code_blocks = extract_code(content)
             code_blocks_len = len(code_blocks)
-            some_file = (
-                conversion_python_dir / f"{prefix}{cobol_file.stem}.{suffix}"
-            )
+            some_file = conversion_python_dir / f"{prefix}{cobol_file.stem}.{suffix}"
             if code_blocks_len > 0:
                 if suffix == "py":
                     process_python_file(some_file, code_blocks[0])
             elif suffix == "txt":
                 some_file.write_text(content)
+            return some_file
+        return None
 
     for message in user_proxy.chat_messages[conversion_manager]:
         if "name" in message:
@@ -65,7 +61,9 @@ def convert_single_file(cobol_file: Path):
                 case "Python_Coder":
                     process_message(message, "")
                 case "Unit_Tester":
-                    process_message(message, "test_")
+                    test_file = process_message(message, "test_")
+                    if test_file is not None:
+                        run_subprocess(test_file)
                 case "Code_Critic":
                     process_message(message, "critique_", "txt")
 
