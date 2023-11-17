@@ -1,9 +1,11 @@
+from typing import List
 from cobol_converter.config import cfg
 
 
-def list_cobol_files():
+def list_cobol_files(exclusion_file_names: List[str] = []):
     for file in cfg.source_code_dir.rglob("*.cbl"):
-        yield file
+        if file.stem not in exclusion_file_names:
+            yield file
 
 
 def get_cobol():

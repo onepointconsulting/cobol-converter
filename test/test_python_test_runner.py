@@ -11,7 +11,9 @@ class TestSubprocessRunner(unittest.TestCase):
         test_file = cur_file.parent.parent / "sample_python/test_hello.py"
         assert test_file.exists(), f"File {test_file} does not exist."
         run_subprocess(test_file)
-        assert (cur_file.parent.parent / "sample_python/test_hello.py_test_output.log").exists()
+        assert (
+            cur_file.parent.parent / "sample_python/test_hello.py_test_output.log"
+        ).exists()
 
 
 if __name__ == "__main__":

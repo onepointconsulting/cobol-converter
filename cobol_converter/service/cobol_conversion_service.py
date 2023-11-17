@@ -39,13 +39,18 @@ def convert_single_file(cobol_file: Path):
         message=user_proxy_message,
     )
 
-    def process_message(message: dict, prefix: str, suffix: str = "py") -> Optional[Path]:
+    def process_message(
+        message: dict, prefix: str, suffix: str = "py"
+    ) -> Optional[Path]:
         if "content" in message:
             content = message["content"]
             conversion_python_dir = cfg.conversion_python_dir
             code_blocks = extract_code(content)
             code_blocks_len = len(code_blocks)
-            some_file = conversion_python_dir / f"{prefix}{cobol_file.stem}.{suffix}"
+            conversion_folder = conversion_python_dir / cobol_file.stem
+            conversion_folder.mkdir(parents=True, exist_ok=True)
+            assert conversion_folder, f"Folder {conversion_folder} does not exist."
+            some_file = conversion_folder / f"{prefix}{cobol_file.stem}.{suffix}"
             if code_blocks_len > 0:
                 if suffix == "py":
                     process_python_file(some_file, code_blocks[0])
@@ -66,9 +71,3 @@ def convert_single_file(cobol_file: Path):
                         run_subprocess(test_file)
                 case "Code_Critic":
                     process_message(message, "critique_", "txt")
-
-
-if __name__ == "__main__":
-    from cobol_converter.service.cobol_retriever_function import list_cobol_files
-
-    cobol_conversion(list_cobol_files())
