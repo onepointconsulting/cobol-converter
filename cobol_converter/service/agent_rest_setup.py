@@ -22,7 +22,7 @@ def user_proxy_rest_factory() -> UserProxyAgent:
         human_input_mode="NEVER",
         max_consecutive_auto_reply=10,
         is_termination_msg=terminate_lambda,
-        code_execution_config={"work_dir": cfg.code_execution_dir, "use_docker": False},
+        code_execution_config=False,
         system_message=prompts["agents"]["rest_user_proxy"]["system_message"],
     )
     return user_proxy_agent
