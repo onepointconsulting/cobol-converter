@@ -2,6 +2,9 @@ from pathlib import Path
 
 from typing import List, Optional
 
+from autogen import UserProxyAgent
+from autogen.agentchat.conversable_agent import ConversableAgent
+
 from cobol_converter.service.agent_setup import user_proxy, conversion_manager
 
 from cobol_converter.service.code_extractor import extract_code
@@ -11,6 +14,12 @@ from cobol_converter.toml_support import prompts
 from cobol_converter.config import cfg
 from cobol_converter.log_factory import logger
 from cobol_converter.service.python_test_runner import run_subprocess
+from cobol_converter.service.agent_setup import AgentType
+from cobol_converter.service.agent_rest_setup import (
+    user_proxy_rest_factory,
+    python_code_rest_generator,
+    create_rest_factory_chat,
+)
 
 
 def cobol_conversion(cobol_files: List[Path]):
@@ -27,6 +36,32 @@ def process_python_file(file: Path, content: str):
         file.write_text(content)
         format_file(file)
         lint_code(file)
+
+
+def process_rest_conversion(file: Path):
+    python_code = file.read_text()
+
+    rest_user_proxy = user_proxy_rest_factory()
+    rest_agent = python_code_rest_generator()
+    create_rest_factory_chat(rest_user_proxy, rest_agent, python_code)
+
+    for message in rest_user_proxy.chat_messages[rest_agent]:
+        if "role" in message and message["role"] == "user":
+            content = message["content"]
+            code_blocks = extract_code(content)
+            if len(code_blocks) > 0:
+                rest_interface_file = (
+                    cfg.conversion_python_dir / file.stem / f"rest_{file.stem}.py"
+                )
+                all_code = "\n\n".join(code_blocks)
+                rest_interface_file.write_text(all_code)
+
+
+def loop_chat_messages(user_proxy: UserProxyAgent, manager: ConversableAgent):
+    for message in user_proxy.chat_messages[manager]:
+        if "name" in message:
+            agent_name = message["name"]
+            yield message, agent_name
 
 
 def convert_single_file(cobol_file: Path):
@@ -59,15 +94,16 @@ def convert_single_file(cobol_file: Path):
             return some_file
         return None
 
-    for message in user_proxy.chat_messages[conversion_manager]:
-        if "name" in message:
-            agent_name = message["name"]
-            match agent_name:
-                case "Python_Coder":
-                    process_message(message, "")
-                case "Unit_Tester":
-                    test_file = process_message(message, "test_")
-                    if test_file is not None:
-                        run_subprocess(test_file)
-                case "Code_Critic":
-                    process_message(message, "critique_", "txt")
+    for message, agent_name in loop_chat_messages(user_proxy, conversion_manager):
+        match agent_name:
+            case AgentType.AGENT_PYTHON_CODER:
+                python_file = process_message(message, "")
+                process_rest_conversion(python_file)
+            case AgentType.AGENT_UNIT_TESTER:
+                test_file = process_message(message, "test_")
+                if test_file is not None:
+                    run_subprocess(test_file)
+            case AgentType.AGENT_REST_INTERFACE_GENERATOR:
+                process_message(message, "rest_")
+            case AgentType.AGENT_CODE_CRITIC:
+                process_message(message, "critique_", "txt")

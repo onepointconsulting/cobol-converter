@@ -7,10 +7,20 @@ from cobol_converter.autogen_config import config_list
 from cobol_converter.config import cfg
 from cobol_converter.service.code_extractor import extract_code
 from cobol_converter.toml_support import prompts
+from cobol_converter.service.terminators import terminate_lambda
 
-AGENT_PYTHON_CODER = "Python_Coder"
-AGENT_UNIT_TESTER = "Unit_Tester"
-AGENT_CODE_CRITIC = "Code_Critic"
+
+class AgentType:
+    AGENT_PYTHON_CODER = "Python_Coder"
+    AGENT_UNIT_TESTER = "Unit_Tester"
+    AGENT_CODE_CRITIC = "Code_Critic"
+    AGENT_REST_INTERFACE_GENERATOR = "Code_REST_Generator"
+
+
+class UserProxyType:
+    MAIN_PROXY = "user_proxy"
+    REST_PROXY = "rest_user_proxy"
+
 
 llm_config = {
     "cache_seed": cfg.seed,  # seed for caching and reproducibility
@@ -19,13 +29,9 @@ llm_config = {
 }
 
 
-def terminate_lambda(x: str):
-    return x.get("content", "").rstrip().find("TERMINATE") > -1
-
-
 def cobol_convert_agent_factory() -> AssistantAgent:
     assistant = AssistantAgent(
-        name=AGENT_PYTHON_CODER,
+        name=AgentType.AGENT_PYTHON_CODER,
         system_message=prompts["agents"]["python_coder"]["system_message"],
         llm_config=llm_config,
     )
@@ -34,7 +40,7 @@ def cobol_convert_agent_factory() -> AssistantAgent:
 
 def python_test_agent_factory() -> AssistantAgent:
     assistant = AssistantAgent(
-        name=AGENT_UNIT_TESTER,
+        name=AgentType.AGENT_UNIT_TESTER,
         system_message=prompts["agents"]["python_unit_tester"]["system_message"],
         llm_config=llm_config,
     )
@@ -43,7 +49,7 @@ def python_test_agent_factory() -> AssistantAgent:
 
 def python_code_critic_factory() -> AssistantAgent:
     assistant = AssistantAgent(
-        name=AGENT_CODE_CRITIC,
+        name=AgentType.AGENT_CODE_CRITIC,
         system_message=prompts["agents"]["code_critic"]["system_message"],
         llm_config=llm_config,
         is_termination_msg=terminate_lambda,
@@ -53,12 +59,12 @@ def python_code_critic_factory() -> AssistantAgent:
 
 def user_proxy_factory() -> UserProxyAgent:
     user_proxy_agent = UserProxyAgent(
-        name="user_proxy",
+        name=UserProxyType.MAIN_PROXY,
         human_input_mode="NEVER",
         max_consecutive_auto_reply=10,
         is_termination_msg=terminate_lambda,
         code_execution_config={"work_dir": cfg.code_execution_dir, "use_docker": False},
-        system_message="A human admin.",
+        system_message=prompts["agents"]["userproxy"]["system_message"],
     )
     return user_proxy_agent
 
@@ -77,11 +83,13 @@ def create_group_chat_manager(
 
 
 user_proxy = user_proxy_factory()
-cobol_convert_agent = cobol_convert_agent_factory()
-python_test_agent = python_test_agent_factory()
-code_critic_agent = python_code_critic_factory()
 conversion_manager = create_group_chat_manager(
-    user_proxy, [cobol_convert_agent, python_test_agent, code_critic_agent]
+    user_proxy,
+    [
+        cobol_convert_agent_factory(),
+        python_test_agent_factory(),
+        python_code_critic_factory(),
+    ],
 )
 
 

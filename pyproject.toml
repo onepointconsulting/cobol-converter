@@ -12,6 +12,8 @@ langchain = "^0.0.335"
 pylint = "^3.0.2"
 tomli = "^2.0.1"
 black = "^23.11.0"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 
 
 [tool.poetry.group.dev.dependencies]
