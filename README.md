@@ -45,3 +45,20 @@ PROJECT_ROOT = <the root of your project / property_finder>
 ```
 python -m unittest
 ```
+
+## Running the main script
+
+Overwrite files in folder
+```
+python ./cobol_converter/cobol_converter_main.py overwrite
+```
+
+Clear all files after creating backup of existing files
+```
+python ./cobol_converter/cobol_converter_main.py clear
+```
+
+Incrementally convert more files
+```
+python ./cobol_converter/cobol_converter_main.py only_new
+```

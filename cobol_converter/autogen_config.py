@@ -6,7 +6,7 @@ from cobol_converter.config import cfg
 config_list = autogen.config_list_from_json(
     "OAI_CONFIG_LIST",
     filter_dict={
-        "model": ["gpt-4", cfg.oai_config_list[0]["model"]],
+        "model": [cfg.oai_config_list[0]["model"]],
     },
 )
 

@@ -30,6 +30,7 @@ class Config:
     temperature = int(os.getenv("TEMPERATURE"))
     seed = int(os.getenv("SEED"))
     max_tries = int(os.getenv("MAX_TRIES"))
+    test_process_timeout = int(os.getenv("TEST_PROCESS_TIMEOUT"))
 
 
 cfg = Config()
@@ -37,3 +38,4 @@ cfg = Config()
 if __name__ == "__main__":
     logger.info("Configuration Info:")
     help(cfg)
+    logger.info("test_process_timeout: %d", cfg.test_process_timeout)

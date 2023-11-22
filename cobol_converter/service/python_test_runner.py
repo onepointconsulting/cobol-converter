@@ -1,17 +1,22 @@
 from pathlib import Path
 import subprocess
+import multiprocessing
+import time
 
 from cobol_converter.log_factory import logger
+from cobol_converter.config import cfg
 
 
-def run_subprocess(script_path: Path):
+def start_python_process(script_path: Path):
     try:
+        logger.info(f"Calling script {script_path}")
         proc = subprocess.run(
-            ["python.exe", script_path.as_posix()],
+            ["python", script_path.as_posix()],
             capture_output=True,
             check=True,
             shell=True,
         )
+
         test_output_file = script_path.parent / f"{script_path.name}_test_output.log"
         with open(test_output_file, "wb") as f:
             f.write(b"\n=====================\nStandard Out:\n")
@@ -26,3 +31,14 @@ def run_subprocess(script_path: Path):
         logger.exception(f"Failed to run process for {script_path}")
         test_output_file = script_path.parent / f"{script_path.name}_test_error.log"
         test_output_file.write_text(str(e))
+
+
+def run_subprocess(script_path: Path):
+    p = multiprocessing.Process(
+        target=start_python_process, name="python_runner", args=(script_path,)
+    )
+    p.start()
+
+    # Wait some time until it times out
+    time.sleep(cfg.test_process_timeout)
+    p.terminate()
