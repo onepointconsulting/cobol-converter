@@ -79,7 +79,7 @@ def process_rest_conversion(file: Path):
                     all_code = "\n\n".join(code_blocks)
                     if not rest_interface_file.parent.exists():
                         rest_interface_file.parent.mkdir(parents=True, exist_ok=True)
-                    rest_interface_file.write_text(all_code)
+                    process_python_file(rest_interface_file, all_code)
             case AgentType.AGENT_CODE_CRITIC:
                 process_message(message, "rest_critique_", file, "txt")
 
