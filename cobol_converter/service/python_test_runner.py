@@ -40,5 +40,7 @@ def run_subprocess(script_path: Path):
     p.start()
 
     # Wait some time until it times out
-    time.sleep(cfg.test_process_timeout)
+    p.join(cfg.test_process_timeout)
+
+    # time.sleep(cfg.test_process_timeout)
     p.terminate()
