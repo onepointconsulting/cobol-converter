@@ -11,7 +11,7 @@ conda activate cobol_converter
 pip install poetry
 poetry install
 ```
-This creates a specific environment with all the libraries in need!
+This creates a specific environment with all the libraries you need!
 
 
 ## Configuration
