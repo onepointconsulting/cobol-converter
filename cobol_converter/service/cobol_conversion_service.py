@@ -92,6 +92,33 @@ def loop_chat_messages(user_proxy: UserProxyAgent, manager: ConversableAgent):
 
 
 def convert_single_file(cobol_file: Path):
+    """
+    Convert a single COBOL file to Python code and perform additional processing.
+
+    :param cobol_file: The Path object representing the input COBOL file.
+    :type cobol_file: Path
+
+    This function reads the content of the COBOL file, initiates a chat with the user proxy
+    and processes messages received during the chat.
+    The messages are handled by different agents based on their types.
+
+    - For messages from the Python coder agent, the COBOL code is converted to a Python file,
+      and additional processing is performed using the `process_rest_conversion` function.
+
+    - For messages from the unit tester agent, a test file is generated and executed using
+      the `run_subprocess` function.
+
+    - For messages from the REST interface generator agent, the corresponding processing is done.
+
+    - For messages from the code critic agent, a critique file is generated.
+
+    :raises: Exceptions may be raised during the conversion and processing steps.
+
+    This function relies on the following global variables:
+    - `prompts`: A dictionary containing messages for different agents.
+    - `user_proxy`: An object representing the user proxy for chat-based interaction.
+    - `conversion_manager`: An object managing the conversion process.
+    """
     cobol_code = cobol_file.read_text()
     user_proxy_message = (prompts["agents"]["userproxy"]["message"]).format(
         cobol_code=cobol_code

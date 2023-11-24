@@ -2,10 +2,8 @@ from typing import List
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
 
 from cobol_converter.autogen_config import llm_config
-from cobol_converter.service.cobol_retriever_function import list_cobol_files
 from cobol_converter.autogen_config import config_list
 from cobol_converter.config import cfg
-from cobol_converter.service.code_extractor import extract_code
 from cobol_converter.toml_support import prompts
 from cobol_converter.service.terminators import terminate_lambda
 
